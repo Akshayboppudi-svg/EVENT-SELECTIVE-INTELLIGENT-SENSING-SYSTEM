@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: event_sensing_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite+aiosqlite:///./event_selective.db
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://localhost:80"]
+    volumes:
+      - backend_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./event-sensing-system
+      dockerfile: Dockerfile
+    container_name: event_sensing_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_data:
